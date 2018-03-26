@@ -1,0 +1,23 @@
+{
+  "rasa_nlu_data": {
+    "common_examples": [
+      {
+        "text": "hello",
+        "intent": "greet",
+        "entities": []
+      },
+      {
+        "text": "iphone 8 giá bn",
+        "intent": "ask_product",
+        "entities": [
+          {
+            "start": 0,
+            "end": 8,
+            "value": "iphone 8",
+            "entity": "product"
+          }
+        ]
+      }
+    ]
+  }
+}
