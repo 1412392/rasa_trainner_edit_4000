@@ -17,6 +17,7 @@ import {
   CLOSE_ADD_MODAL,
   SAVE_AND_CLOSE_ADD_MODAL,
   RESET,
+  PUSHMESSAGE_DONE
 } from './actions'
 
 let exampleIDCounter = 0
@@ -37,7 +38,7 @@ function prepareExamples(examples = []) {
   return examples.map(example => createExample(example))
 }
 
-const INITIAL_STATE = {
+var INITIAL_STATE = {
   filename: 'testData.json',
   originalSource: isOnline ? testData : null,
   examples: isOnline
@@ -115,7 +116,13 @@ export default function reducer (
     case SAVING_DONE: {
       return {
         ...state,
-        isUnsaved: false,
+        isUnsaved: true,
+      }
+    }
+     case PUSHMESSAGE_DONE: {
+      return {
+        ...state,
+        isUnsaved: true,
       }
     }
     case EXPAND: {

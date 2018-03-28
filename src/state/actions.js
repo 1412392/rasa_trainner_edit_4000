@@ -95,6 +95,29 @@ export const save = (source: string): Function =>  async (
   }
 }
 
+export const PUSHMESSAGE_DONE = 'PUSHMESSAGE_DONE'
+export const pushToRabbitJson = (source: string): Function =>  async (
+  dispatch: Function
+): Promise<void> => {
+  const response = await fetch(`${ROOT_PATH}pushmessage`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: source,
+  })
+
+
+  //TODO add progressing feedback
+  const json = await response.json()
+  if (json.ok) {
+    dispatch({
+      type: PUSHMESSAGE_DONE,
+    })
+  }
+}
+
 export const EXPAND = 'EXPAND'
 export const expand = (id: string): Object => ({
   type: EXPAND,

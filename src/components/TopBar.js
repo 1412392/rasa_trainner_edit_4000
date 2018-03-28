@@ -9,8 +9,9 @@ import isOnline from '../utils/isOnline'
 import FileReaderInput from 'react-file-reader-input'
 import { saveAs } from 'file-saver'
 import generateExport from '../utils/generateExport'
+import { notification } from 'antd';
 
-const mapState = (state) => ({
+var mapState = (state) => ({
   filename: state.filename || 'loading...',
   isUnsaved: state.isUnsaved,
   examples: state.examples,
@@ -20,11 +21,11 @@ const mapActions = dispatch => ({
   save: (examples) => {
     dispatch(actions.save(examples))
   },
-  openAddModal: () => {
-    dispatch(actions.openAddModal())
-  },
   fetchData: (path, data) => {
     dispatch(actions.fetchData(path, data))
+  },
+  pushToRabbitJson: (examples) => {
+    dispatch(actions.pushToRabbitJson(examples))
   },
 })
 
@@ -35,6 +36,18 @@ const styles = {
     marginRight: 8,
   }
 }
+const openNotification = () => {
+  const args = {
+    message: 'Thông báo',
+    description: 'Cập nhật thành công. ',
+    duration: 2,
+  };
+  notification.open(args);
+
+
+};
+
+
 
 class TopBar extends Component {
   handleFileInputChange(_, results) {
@@ -51,7 +64,7 @@ class TopBar extends Component {
     this.props.fetchData(file.name, data)
   }
   render() {
-    const { filename, isUnsaved, save, openAddModal } = this.props
+    const { filename, isUnsaved, save } = this.props
 
     const fileButtons = isOnline
       ? (
@@ -78,31 +91,47 @@ class TopBar extends Component {
           >
             <Icon type='download' /> Download
           </Button>
+
+           
+
         </div>
       )
       : (
         <Button
           style={ styles.button }
-          type={isUnsaved ? 'primary' : 'default'}
+          type={isUnsaved ? 'primary' : 'danger'}
           onClick={() => save(generateExport())}
         >
           Save
         </Button>
+        
       )
 
     return (
       <div style={{ height: 32, display: 'flex' }}>
-        <h1 style={{ marginLeft: 8, marginTop: 5 }}>
-          DỮ LIỆU CHƯA ĐƯỢC EDIT
+        <h1 style={{ marginLeft: 8, marginTop: 0, color:'orange' }}>
+          DỮ LIỆU ĐÃ ĐƯỢC EDIT (STATUS=2)
         </h1>
+
+        {isUnsaved ? openNotification() : null}
+
+
         <div style={{flex: 1}} />
-        <Button
+          {/* <Button
           style={ styles.button }
           type='primary'
           onClick={() => openAddModal()}
         >
           Add new example
+        </Button>  */}
+         <Button
+          style={ styles.button }
+          type={isUnsaved ? 'primary' : 'danger'}
+          onClick={() => this.props.pushToRabbitJson(generateExport())}
+        >
+          Request Train
         </Button>
+        
          {fileButtons}
        
       </div>
