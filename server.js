@@ -15,7 +15,8 @@ const pkg = require('./package.json')
 var redis = require("redis"),
     client = redis.createClient(6379, "172.16.3.123");
 
-
+const amqp = require('amqplib/callback_api');
+const rabbitMQ='amqp://tgdd:Tgdd2O15@192.168.2.112:5672/';
 
 updateNotifier({
     pkg,
@@ -321,7 +322,7 @@ function serve() {
 
                                     //console.log(json);
                                     json += ']' + '}' + '}';
-                                    console.log(json);
+                                    //console.log(json);
                                     
 
                                     //write to file
@@ -332,7 +333,17 @@ function serve() {
 
 									//push to rabbitMQ
 
-									
+									amqp.connect(rabbitMQ, function(err, conn) {
+									  conn.createChannel(function(err, ch) {
+									    var q = 'didx.chatbot';
+									    var requestTrainMessage="Request on "+Date();
+									    // Note: on Node 6 Buffer.from(msg) should be used
+									    ch.sendToQueue(q, new Buffer(requestTrainMessage));
+									    console.log(" Sent to RabbitMQ success: "+requestTrainMessage);
+
+									  });
+									});
+
 									//json = JSON.parse(json);
 
                                     res.json({ ok: true });
@@ -369,7 +380,7 @@ function serve() {
             '"common_examples":' + '[';
 
         var lstkeys = [];
-        // client.select(2,function(){
+        //client.select(2,function(){
 
         client.keys("*", function (err, arrayOfKeys) {
             arrayOfKeys.forEach(function (key) {
@@ -382,6 +393,7 @@ function serve() {
                 client.get(lstkeys[i], function (err, reply) {
                     var object = JSON.parse(reply);
                     if (object.status == 2) {
+
                         json += '{' + '"text":' + '"' + object.text.replace(/\n/g, '') + '"' + ',' +
 
                             '"status":' + object.status + ',' +
@@ -436,7 +448,7 @@ function serve() {
 
         });
 
-        // });
+        //});
     });
 
 
@@ -464,51 +476,25 @@ function serve() {
 
     app.post('/save', function (req, res) {
         const data = req.body;
-        console.log(data.rasa_nlu_data.common_examples[0]);
+        //console.log(data.rasa_nlu_data.common_examples[0]);
 
         //update lai status
 
         var status = 2;
         for (var i = 0; i < data.rasa_nlu_data.common_examples.length; i++) {
             var object = data.rasa_nlu_data.common_examples[i];
-
+            object.status=2;
             var key = object.key;
-            var json = "";
+            var json = JSON.stringify(object);
 
-            json = '{' + '"text":' + '"' + object.text.replace(/\n/g, '') + '"' + ',' +
+            console.log(object.text);
 
-                '"status":' + status + ',' +
-                '"intent":' + '"' + object.intent + '"' + ',' +
-                '"key":' + '"' + object.key + '"' + ',' +
-                '"entities":' + '['
-            if (object.entities.length > 0) {
-                for (var j = 0; j < object.entities.length; j++) {
-                    if (j === object.entities.length - 1) {
-
-                        json += '{' +
-                            '"start":' + object.entities[j].start + ',' +
-                            '"end":' + object.entities[j].end + ',' +
-                            '"value":' + '"' + object.entities[j].value + '"' + ',' + '"entity":' + '"' + object.entities[j].entity + '"' + '}';
-
-                    }
-                    else {
-                        json += '{' +
-                            '"start":' + object.entities[j].start + ',' +
-                            '"end":' + object.entities[j].end + ',' +
-                            '"value":' + '"' + object.entities[j].value + '"' + ',' +
-                            '"entity":' + '"' + object.entities[j].entity + '"' + '}' + ',';
-                    }
+            client.set(key, json, function (err, reply) {
+                if (err) {
+                    res.json({ ok: false });
+                    console.log("FAIL AT  " + key);
                 }
-            }
-            json += ']}';
-
-            client.select(0, function () {
-                client.set(key, json, function (err, reply) {
-                    if (err) {
-                        res.json({ ok: false });
-                    }
-                    console.log("Updated " + key);
-                });
+                console.log("Updated " + key);
             });
 
         }
