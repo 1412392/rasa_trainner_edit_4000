@@ -109,8 +109,8 @@ class TopBar extends Component {
 
     return (
       <div style={{ height: 32, display: 'flex' }}>
-        <h1 style={{ marginLeft: 8, marginTop: 0, color:'orange' }}>
-          DỮ LIỆU ĐÃ ĐƯỢC EDIT (STATUS=2)
+        <h1 style={{ marginLeft: 8, marginTop: 0, color:'green' }}>
+          DỮ LIỆU ĐANG CHỜ TRAIN VÀ ĐÃ TRAIN XONG (STATUS=3)
         </h1>
 
         {isUnsaved ? openNotification() : null}
@@ -124,13 +124,6 @@ class TopBar extends Component {
         >
           Add new example
         </Button>  */}
-         <Button
-          style={ styles.button }
-          type={isUnsaved ? 'primary' : 'danger'}
-          onClick={() => this.props.pushToRabbitJson(generateExport())}
-        >
-          Request Train
-        </Button>
         
          {fileButtons}
        

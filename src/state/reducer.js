@@ -116,13 +116,13 @@ export default function reducer (
     case SAVING_DONE: {
       return {
         ...state,
-        isUnsaved: true,
+        isUnsaved: true
       }
     }
      case PUSHMESSAGE_DONE: {
       return {
         ...state,
-        isUnsaved: true,
+        isUnsaved: true
       }
     }
     case EXPAND: {
